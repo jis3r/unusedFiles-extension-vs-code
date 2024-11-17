@@ -1,23 +1,61 @@
 {
   "name": "files",
-  "displayName": "files",
-  "description": "Find and manage unused files in your project.",
+  "displayName": "Unused Files Finder",
+  "description": "Find and manage unused Asset files in your project.",
   "version": "0.0.1",
+  "publisher": "shuheb",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/imShuheb/unusedFiles-extension-vs-code.git"
+  },
   "engines": {
     "vscode": "^1.95.0"
   },
   "categories": [
     "Other"
   ],
-  "activationEvents": [],
+  "activationEvents": [
+    "onCommand:files.check",
+    "onCommand:unusedAssets.previewFile",
+    "onCommand:unusedAssets.deleteFile",
+    "onView:unusedAssetsView"
+  ],
   "main": "./dist/extension.js",
   "contributes": {
     "commands": [
       {
         "command": "files.check",
-        "title": "check"
+        "title": "Check for Unused Files",
+        "category": "Unused Files Tools"
+      },
+      {
+        "command": "unusedAssets.previewFile",
+        "title": "Preview File",
+        "category": "Unused Files Tools"
+      },
+      {
+        "command": "unusedAssets.deleteFile",
+        "title": "Delete Unused File",
+        "category": "Unused Files Tools"
       }
-    ]
+    ],
+    "views": {  
+      "explorer": [
+        {
+          "id": "unusedAssetsView",
+          "name": "Unused Assets"
+        }
+      ]
+    },
+    "menus": {
+      "explorer/context": [
+        {
+          "command": "unusedAssets.deleteFile",
+          "when": "resourceExtname =~ /\\.(jpg|jpeg|png|gif|svg)$/",
+          "group": "navigation"
+        }
+      ]
+    }
   },
   "scripts": {
     "vscode:prepublish": "npm run package",
@@ -36,14 +74,15 @@
   "devDependencies": {
     "@types/vscode": "^1.95.0",
     "@types/mocha": "^10.0.9",
-    "@types/node": "20.x",
-    "@typescript-eslint/eslint-plugin": "^8.10.0",
-    "@typescript-eslint/parser": "^8.7.0",
-    "eslint": "^9.13.0",
-    "esbuild": "^0.24.0",
+    "@types/node": "^20.0.0",
+    "@typescript-eslint/eslint-plugin": "^6.4.0",
+    "@typescript-eslint/parser": "^6.4.0",
+    "eslint": "^8.49.0",
+    "esbuild": "^0.19.4",
     "npm-run-all": "^4.1.5",
-    "typescript": "^5.6.3",
+    "typescript": "^5.2.2",
     "@vscode/test-cli": "^0.0.10",
     "@vscode/test-electron": "^2.4.1"
-  }
+  },
+  "dependencies": {}
 }
