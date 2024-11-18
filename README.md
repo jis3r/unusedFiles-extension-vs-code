@@ -1,71 +1,56 @@
-# files README
 
-This is the README for your extension "files". After writing up a brief description, we recommend including the following sections.
+# Unused Image Finder for VSCode
+
+This VSCode extension helps developers identify unused image files in their workspace. It scans for all image files and determines whether they are referenced in the code, making it easy to clean up unused assets.
 
 ## Features
 
-Describe specific features of your extension including screenshots of your extension in action. Image paths are relative to this README file.
+- **Identify Unused Images**: Automatically scans your workspace to find unused image files.
+- **Customizable Directory Exclusions**: Exclude common directories like `node_modules`, `.next`, and others to speed up the scan.
+- **Caching for Performance**: Caches the results of image usage checks to avoid repeated computations.
+- **Filter for Image Files**: Automatically detects common image file types like `.jpg`, `.png`, `.svg`, etc.
+- **Manual Cache Invalidation**: Provides a utility to clear the cache when workspace files change.
 
-For example if there is an image subfolder under your extension project workspace:
+## Installation
 
-\!\[feature X\]\(images/feature-x.png\)
+1. Clone this repository:
+   ```bash
+   git clone <repository-url>
+   ```
+2. Open the project in VSCode.
+3. Run the `Extension Development Host` to start using the extension.
 
-> Tip: Many popular extensions utilize animations. This is an excellent way to show off your extension! We recommend short, focused animations that are easy to follow.
+## Usage
 
-## Requirements
+1. Open your workspace in VSCode.
+2. Use the command palette (`Ctrl+Shift+P` or `Cmd+Shift+P`) to invoke commands like:
+   - **Find Unused Images**
+3. View the list of unused images and clean up your workspace.
 
-If you have any requirements or dependencies, add a section describing those and how to install and configure them.
+## How It Works
 
-## Extension Settings
+1. The extension scans all files in your workspace while ignoring excluded directories.
+2. It identifies image files and checks their usage across code files (`.js`, `.ts`, `.html`, etc.).
+3. Results are cached to improve performance for subsequent scans.
+4. Developers can invalidate the cache manually when needed.
 
-Include if your extension adds any VS Code settings through the `contributes.configuration` extension point.
+## Supported File Types
 
-For example:
+- Image file types: `.jpg`, `.jpeg`, `.png`, `.svg`, `.gif`, `.bmp`, `.webp`
+- Code file types scanned for usage: `.js`, `.ts`, `.html`, `.css`, `.tsx`, `.jsx`
 
-This extension contributes the following settings:
+## Customization
 
-* `myExtension.enable`: Enable/disable this extension.
-* `myExtension.thing`: Set to `blah` to do something.
+You can customize the excluded directories by editing the `EXCLUDED_DIRECTORIES` array in the `constants.ts` file.
 
-## Known Issues
+## Contributing
 
-Calling out known issues can help limit users opening duplicate issues against your extension.
+Contributions are welcome! Please open an issue or submit a pull request for any improvements.
 
-## Release Notes
+## License
 
-Users appreciate release notes as you update your extension.
-
-### 1.0.0
-
-Initial release of ...
-
-### 1.0.1
-
-Fixed issue #.
-
-### 1.1.0
-
-Added features X, Y, and Z.
+This project is licensed under the MIT License. See the `LICENSE` file for details.
 
 ---
 
-## Following extension guidelines
-
-Ensure that you've read through the extensions guidelines and follow the best practices for creating your extension.
-
-* [Extension Guidelines](https://code.visualstudio.com/api/references/extension-guidelines)
-
-## Working with Markdown
-
-You can author your README using Visual Studio Code. Here are some useful editor keyboard shortcuts:
-
-* Split the editor (`Cmd+\` on macOS or `Ctrl+\` on Windows and Linux).
-* Toggle preview (`Shift+Cmd+V` on macOS or `Shift+Ctrl+V` on Windows and Linux).
-* Press `Ctrl+Space` (Windows, Linux, macOS) to see a list of Markdown snippets.
-
-## For more information
-
-* [Visual Studio Code's Markdown Support](http://code.visualstudio.com/docs/languages/markdown)
-* [Markdown Syntax Reference](https://help.github.com/articles/markdown-basics/)
-
-**Enjoy!**
+Happy coding! 🚀
