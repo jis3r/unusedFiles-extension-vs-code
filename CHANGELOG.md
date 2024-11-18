@@ -1,9 +1,18 @@
 # Change Log
 
-All notable changes to the "files" extension will be documented in this file.
-
-Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
-
 ## [Unreleased]
 
-- Initial release
+- N/A
+
+## [0.0.2] - 2024-11-18
+### Fixed
+- Improved the search functionality for unused assets to optimize speed and accuracy.
+
+## [0.0.1] - 2024-11-18
+### Added
+- Initial release with the following features:
+  - Detect unused asset files in your project.
+  - Preview unused files.
+  - Delete unused files directly from the tree view.
+  - Support for paginated results in the unused assets view.
+  - Exclude directories like `node_modules`, `.next`, `.dist`, and `.out`.
