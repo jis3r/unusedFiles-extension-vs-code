@@ -46,7 +46,7 @@ export async function isImageFileUsed(imageFile: string): Promise<boolean> {
 
         if (fileTypes.includes(fileExtension)) {
             const fileContent = await vscode.workspace.fs.readFile(fileUri);
-            const contentString = fileContent.toString().toLowerCase().slice(0, 400); // Limit to first 400 characters
+            const contentString = fileContent.toString().toLowerCase();
             const regex = new RegExp(imageFileName, 'i');
 
             if (regex.test(contentString)) {

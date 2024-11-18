@@ -1,10 +1,11 @@
 {
-  "name": "finder",
+  "name": "unused-assets-finder",
   "displayName": "Unused Assets Finder",
   "description": "Find and manage unused Asset files in your project.",
   "version": "0.0.1",
   "publisher": "shuheb",
   "license": "MIT",
+  "icon": "icon.png",
   "repository": {
     "type": "git",
     "url": "https://github.com/imShuheb/unusedFiles-extension-vs-code.git"
@@ -40,7 +41,7 @@
         "category": "Unused Files Tools"
       }
     ],
-    "views": {  
+    "views": {
       "explorer": [
         {
           "id": "unusedAssetsView",
