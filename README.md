@@ -15,7 +15,7 @@ This VSCode extension helps developers identify unused image files in their work
 
 1. Clone this repository:
    ```bash
-   git clone <repository-url>
+   git clone https://github.com/imShuheb/unusedFiles-extension-vs-code.git
    ```
 2. Open the project in VSCode.
 3. Run the `Extension Development Host` to start using the extension.
