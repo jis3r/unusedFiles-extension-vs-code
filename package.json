@@ -2,7 +2,7 @@
   "name": "unused-assets-finder",
   "displayName": "Unused Assets Finder",
   "description": "Find and manage unused Asset files in your project.",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "publisher": "shuheb",
   "license": "MIT",
   "icon": "icon.png",
@@ -45,7 +45,6 @@
         "title": "Refresh",
         "category": "Unused Files Tools",
         "icon": "$(refresh)"
-
       },
       {
         "command": "unusedAssets.previewFile",
