@@ -1,7 +1,6 @@
-
 # Unused Image Finder for VSCode
 
-This VSCode extension helps developers identify unused image files in their workspace. It scans for all image files and determines whether they are referenced in the code, making it easy to clean up unused assets.
+This VSCode extension helps developers identify and manage unused image files in their workspace. It scans your project for image files, determines whether they are referenced in your code, and provides an easy way to clean up unused assets.
 
 ## Features
 
@@ -13,39 +12,34 @@ This VSCode extension helps developers identify unused image files in their work
 
 ## Installation
 
-1. Clone this repository:
-   ```bash
-   git clone https://github.com/imShuheb/unusedFiles-extension-vs-code.git
-   ```
-2. Open the project in VSCode.
-3. Run the `Extension Development Host` to start using the extension.
+1. **Install the Extension**:
+   - Open VSCode.
+   - Go to the Extensions view (`Ctrl+Shift+X` or `Cmd+Shift+X`).
+   - Search for "Unused Image Finder" and click **Install**.
 
 ## Usage
 
-1. Open your workspace in VSCode.
-2. Use the command palette (`Ctrl+Shift+P` or `Cmd+Shift+P`) to invoke commands like:
-   - **Find Unused Images**
-3. View the list of unused images and clean up your workspace.
+1. Open your project in VSCode.
+2. Use the command palette (`Ctrl+Shift+P` or `Cmd+Shift+P`) to invoke the following commands:
+   - **Find Unused Images**: Scans for unused image files in your workspace.
+   - **Refresh Cache**: Clears the current cache and triggers a new scan.
+3. View the list of unused images and remove them if desired.
 
 ## How It Works
 
-1. The extension scans all files in your workspace while ignoring excluded directories.
-2. It identifies image files and checks their usage across code files (`.js`, `.ts`, `.html`, etc.).
-3. Results are cached to improve performance for subsequent scans.
-4. Developers can invalidate the cache manually when needed.
+- The extension scans all files in your workspace, skipping excluded directories like `node_modules` or `.next`.
+- It identifies image files and checks if they are referenced in your code files (like `.js`, `.ts`, `.html`, etc.).
+- The results are cached for performance, so subsequent scans are faster.
+- You can manually refresh the cache using the "Refresh Cache" command from the command palette.
 
 ## Supported File Types
 
-- Image file types: `.jpg`, `.jpeg`, `.png`, `.svg`, `.gif`, `.bmp`, `.webp`
-- Code file types scanned for usage: `.js`, `.ts`, `.html`, `.css`, `.tsx`, `.jsx`
+- **Image file types**: `.jpg`, `.jpeg`, `.png`, `.svg`, `.gif`, `.bmp`, `.webp`
+- **Code file types**: `.js`, `.ts`, `.html`, `.css`, `.tsx`, `.jsx`
 
 ## Customization
 
-You can customize the excluded directories by editing the `EXCLUDED_DIRECTORIES` array in the `constants.ts` file.
-
-## Contributing
-
-Contributions are welcome! Please open an issue or submit a pull request for any improvements.
+You can exclude specific directories from the scan (like `node_modules`, `.next`, etc.) by modifying the extension’s settings. For more advanced users, see the developer documentation.
 
 ## License
 

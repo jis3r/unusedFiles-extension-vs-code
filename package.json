@@ -17,39 +17,69 @@
     "Other"
   ],
   "activationEvents": [
-    "onCommand:files.check",
-    "onCommand:unusedAssets.previewFile",
-    "onCommand:unusedAssets.deleteFile",
+    "onStartupFinished",
     "onView:unusedAssetsView"
   ],
   "main": "./dist/extension.js",
   "contributes": {
-    "commands": [
-      {
-        "command": "files.check",
-        "title": "Check for Unused Files",
-        "category": "Unused Files Tools"
-      },
-      {
-        "command": "unusedAssets.previewFile",
-        "title": "Preview File",
-        "category": "Unused Files Tools"
-      },
-      {
-        "command": "unusedAssets.deleteFile",
-        "title": "Delete Unused File",
-        "category": "Unused Files Tools"
-      }
-    ],
-    "views": {
-      "explorer": [
+    "viewsContainers": {
+      "activitybar": [
         {
-          "id": "unusedAssetsView",
-          "name": "Unused Assets"
+          "id": "unusedAssets",
+          "title": "Assets",
+          "icon": "icon.png"
         }
       ]
     },
+    "views": {
+      "unusedAssets": [
+        {
+          "id": "unusedAssetsView",
+          "name": "Assets"
+        }
+      ]
+    },
+    "commands": [
+      {
+        "command": "files.check",
+        "title": "Refresh",
+        "category": "Unused Files Tools",
+        "icon": "$(refresh)"
+
+      },
+      {
+        "command": "unusedAssets.previewFile",
+        "title": "Preview",
+        "category": "Unused Files Tools",
+        "icon": "$(eye)"
+      },
+      {
+        "command": "unusedAssets.deleteFile",
+        "title": "Delete",
+        "category": "Unused Files Tools",
+        "icon": "$(trash)"
+      }
+    ],
     "menus": {
+      "view/title": [
+        {
+          "command": "files.check",
+          "group": "navigation",
+          "icon": "$(refresh)"
+        }
+      ],
+      "view/item/context": [
+        {
+          "command": "unusedAssets.previewFile",
+          "group": "inline",
+          "icon": "$(eye)"
+        },
+        {
+          "command": "unusedAssets.deleteFile",
+          "group": "inline",
+          "icon": "$(trash)"
+        }
+      ],
       "explorer/context": [
         {
           "command": "unusedAssets.deleteFile",

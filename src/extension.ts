@@ -55,25 +55,35 @@ export function activate(context: vscode.ExtensionContext) {
     // Create a file system watcher to watch for file creation, deletion, and modification events.
     const watcher = vscode.workspace.createFileSystemWatcher('**/*', false, false, false);
 
-    /**
-     * Handles file creation events. Triggers the 'files.check' command when a new file is created.
-     * @param uri - The URI of the created file.
-     */
+    const imageExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.bmp', '.webp', '.tiff'];
+
+    // Watcher for file creation events
     watcher.onDidCreate(async (uri) => {
-        vscode.window.showInformationMessage(`File created: ${uri.fsPath}`);
-        // Trigger the 'files.check' command when a file is created.
-        await vscode.commands.executeCommand('files.check');
+        if (isImageFile(uri.fsPath)) {
+            vscode.window.showInformationMessage(`Image file created: ${uri.fsPath}`);
+            await vscode.commands.executeCommand('files.check');
+        }
     });
 
     /**
-     * Handles file deletion events. Triggers the 'files.check' command when a file is deleted.
+     * Handles file deletion events. Triggers the 'files.check' command when an image file is deleted.
      * @param uri - The URI of the deleted file.
      */
     watcher.onDidDelete(async (uri) => {
-        vscode.window.showInformationMessage(`File deleted: ${uri.fsPath}`);
-        // Trigger the 'files.check' command when a file is deleted.
-        await vscode.commands.executeCommand('files.check');
+        if (isImageFile(uri.fsPath)) {
+            vscode.window.showInformationMessage(`Image file deleted: ${uri.fsPath}`);
+            await vscode.commands.executeCommand('files.check');
+        }
     });
+
+    /**
+     * Checks if a given file path is an image file.
+     * @param filePath - The file path to check.
+     * @returns True if the file is an image, otherwise false.
+     */
+    function isImageFile(filePath: string): boolean {
+        return imageExtensions.some((ext) => filePath.endsWith(ext));
+    }
 
     // Add the watcher to the subscriptions for proper cleanup when the extension is deactivated.
     context.subscriptions.push(watcher);
@@ -92,8 +102,11 @@ export function activate(context: vscode.ExtensionContext) {
 
             if (confirmDelete === 'Delete') {
                 try {
-                    await vscode.workspace.fs.delete(fileUri); // Delete the file
+                    await vscode.workspace.fs.delete(fileUri); 
                     vscode.window.showInformationMessage(`Successfully deleted "${filePath}".`);
+                    // Refresh the assets list after deletion
+                    provider.setLoading();
+                    await initializeCheck();
                 } catch (error) {
                     vscode.window.showErrorMessage(`Failed to delete "${filePath}".`);
                 }
@@ -162,3 +175,4 @@ export function activate(context: vscode.ExtensionContext) {
         })
     );
 }
+

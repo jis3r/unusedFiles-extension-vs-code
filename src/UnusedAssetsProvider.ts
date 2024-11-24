@@ -6,11 +6,11 @@ import * as path from 'path';
  * Implements the vscode.TreeDataProvider interface.
  */
 export class UnusedAssetsProvider implements vscode.TreeDataProvider<string> {
-    
+
     /** 
      * Event emitter that triggers updates in the tree view when data changes.
      */
-    private _onDidChangeTreeData: vscode.EventEmitter<string | undefined | void> = 
+    private _onDidChangeTreeData: vscode.EventEmitter<string | undefined | void> =
         new vscode.EventEmitter<string | undefined | void>();
     readonly onDidChangeTreeData: vscode.Event<string | undefined | void> = this._onDidChangeTreeData.event;
 
@@ -29,16 +29,7 @@ export class UnusedAssetsProvider implements vscode.TreeDataProvider<string> {
      */
     private loading: boolean = true;
 
-    /** 
-     * Number of items displayed per page in the tree view.
-     */
-    private pageSize: number = 50;
-
-    /** 
-     * Current page index for pagination.
-     */
-    private currentPage: number = 0;
-
+    
     /**
      * Refreshes the tree view with a new list of unused assets.
      * @param unusedAssets Array of file paths for unused assets.
@@ -47,7 +38,6 @@ export class UnusedAssetsProvider implements vscode.TreeDataProvider<string> {
         this.unusedAssets = unusedAssets;
         this.cache = new Set(unusedAssets);
         this.loading = false; // Stop loading after data is loaded
-        this.currentPage = 0; // Reset to the first page
         this._onDidChangeTreeData.fire();
     }
 
@@ -89,79 +79,86 @@ export class UnusedAssetsProvider implements vscode.TreeDataProvider<string> {
      * @returns A TreeItem representing the unused asset.
      */
     getTreeItem(element: string): vscode.TreeItem {
+        // Handle loading state with spinning icon
         if (this.loading) {
             const loadingItem = new vscode.TreeItem('Loading...', vscode.TreeItemCollapsibleState.None);
-            loadingItem.iconPath = new vscode.ThemeIcon('sync~spin');
+            loadingItem.iconPath = new vscode.ThemeIcon('sync~spin'); // Spinning sync icon
             loadingItem.tooltip = 'Searching for unused assets...';
             return loadingItem;
         }
 
+        // Extract the file name and extension
         const fileName = path.basename(element);
         const treeItem = new vscode.TreeItem(fileName, vscode.TreeItemCollapsibleState.None);
 
-        // Determine the icon based on file extension
+        // Determine icon based on file type
         const fileExtension = path.extname(fileName).toLowerCase();
         if (['.jpg', '.jpeg', '.png', '.gif', '.svg'].includes(fileExtension)) {
-            treeItem.iconPath = new vscode.ThemeIcon('file-media');
+            treeItem.iconPath = new vscode.ThemeIcon('file-media'); // Media file icon
         } else if (['.txt', '.md'].includes(fileExtension)) {
-            treeItem.iconPath = new vscode.ThemeIcon('note');
+            treeItem.iconPath = new vscode.ThemeIcon('note'); // Note file icon
         } else {
-            treeItem.iconPath = new vscode.ThemeIcon('file');
+            treeItem.iconPath = new vscode.ThemeIcon('file'); // Generic file icon
         }
 
-        // Add command for previewing the file
+        // Assign a context value for inline actions
         treeItem.contextValue = 'unusedAsset';
+
+        // Attach the preview command for default click behavior
         treeItem.command = {
             command: 'unusedAssets.previewFile',
             title: 'Preview File',
-            arguments: [element], // Pass the full path for preview
+            arguments: [element], // Pass the full file path to the command
         };
+
+        // Tooltip for better UX
+        treeItem.tooltip = `Path: ${element}`;
 
         return treeItem;
     }
 
     /**
-     * Returns an array of unused assets or a loading placeholder.
-     * Handles pagination and adds a "Load More" item if more assets are available.
-     * @returns An array of file paths or loading/empty placeholders.
+     * Returns all unused assets (no pagination).
+     * @returns An array of file paths.
      */
     getChildren(): string[] {
         if (this.loading) {
-            return ['Loading...']; // Placeholder while loading
+            return ['Loading...']; 
         }
 
         if (this.unusedAssets.length === 0) {
             return ['No unused assets found'];
         }
 
-        // Return paginated results
-        const startIndex = this.currentPage * this.pageSize;
-        const endIndex = startIndex + this.pageSize;
-        const paginatedAssets = this.unusedAssets.slice(startIndex, endIndex);
-
-        // Add a "Load More" item if more results are available
-        if (endIndex < this.unusedAssets.length) {
-            return [...paginatedAssets, 'Load More'];
-        }
-
-        return paginatedAssets;
+        return this.unusedAssets;
     }
 
     /**
-     * Handles the "Load More" action to display additional unused assets.
+     * Adds a "Refresh" item at the top of the tree view for refreshing the list.
+     * @returns An array with "Refresh" at the beginning of the list.
      */
-    loadMore(): void {
-        this.currentPage += 1;
-        this._onDidChangeTreeData.fire();
-    }
+    getTreeItemsWithRefresh(): vscode.TreeItem[] {
+        // Refresh item that can be clicked to trigger refresh
+        const refreshItem = new vscode.TreeItem('Refresh', vscode.TreeItemCollapsibleState.None);
+        refreshItem.command = {
+            command: 'unusedAssets.refreshAssets',
+            title: 'Refresh Assets',
+        };
+        refreshItem.iconPath = new vscode.ThemeIcon('refresh');
+        refreshItem.tooltip = 'Click to refresh the unused assets list';
 
-    /**
-     * Handles the selection of a tree item, specifically for the "Load More" item.
-     * @param element The selected tree item element (either a file or "Load More").
-     */
-    handleLoadMoreSelection(element: string): void {
-        if (element === 'Load More') {
-            this.loadMore();
-        }
+        // Return the refresh item followed by the unused assets
+        const treeItems = this.unusedAssets.map((asset) => {
+            const treeItem = new vscode.TreeItem(path.basename(asset), vscode.TreeItemCollapsibleState.None);
+            treeItem.contextValue = 'unusedAsset';
+            treeItem.command = {
+                command: 'unusedAssets.previewFile',
+                title: 'Preview File',
+                arguments: [asset],
+            };
+            return treeItem;
+        });
+
+        return [refreshItem, ...treeItems];
     }
 }
