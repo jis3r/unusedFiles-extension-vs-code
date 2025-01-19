@@ -22,93 +22,104 @@ export function activate(context: vscode.ExtensionContext) {
         provider.setLoading(); // Set loading state in the provider
 
         try {
-            // Fetch all files in the workspace.
             const allFiles = await getAllFilesInWorkspace();
             const filePaths = allFiles.map(uri => uri.fsPath);
 
-            // Filter out only image files from the workspace.
             const imageFiles = filterImageFiles(filePaths);
-
-            vscode.window.showInformationMessage(`Total image files: ${imageFiles.length}`);
-
-            const unusedImageFiles: string[] = [];
-
-            // Check if each image file is used in the workspace
-            for (const imageFile of imageFiles) {
-                const isUsed = await isImageFileUsed(imageFile);
-                if (!isUsed) {
-                    unusedImageFiles.push(imageFile); // If unused, add to the unused list
-                }
+            if (imageFiles.length === 0) {
+                vscode.window.showInformationMessage('No image files found in the workspace.');
+                provider.refresh([]);
+                return;
             }
 
-            // Refresh the provider with the unused image files.
+            const unusedImageFiles = (
+                await Promise.all(imageFiles.map(async (imageFile) => {
+                    const isUsed = await isImageFileUsed(imageFile);
+                    return isUsed ? null : imageFile;
+                }))
+            ).filter((file): file is string => file !== null);
+
             provider.refresh(unusedImageFiles);
-        } catch (error) {
-            vscode.window.showErrorMessage(`Failed to initialize unused assets: ${error}`);
-            provider.refresh([]); // If there's an error, refresh with an empty list.
+        } catch (error: any) {
+            vscode.window.showErrorMessage(`Failed to initialize unused assets: ${error.message}`);
+            console.error(error);
+            provider.refresh([]);
         }
     };
+
 
     // Call initializeCheck to perform the initial scan for unused assets.
     initializeCheck();
 
-    // Create a file system watcher to watch for file creation, deletion, and modification events.
-    const watcher = vscode.workspace.createFileSystemWatcher('**/*', false, false, false);
+    context.subscriptions.push(
+        vscode.commands.registerCommand('unusedAssets.deleteAllFiles', async () => {
+            // Get current files but filter out special markers
+            const unusedFiles = provider.getChildren().filter(file =>
+                file !== '__loading__' && file !== '__no_assets__'
+            );
 
-    const imageExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.bmp', '.webp', '.tiff'];
+            // Check if we have any real files to delete
+            if (unusedFiles.length === 0) {
+                vscode.window.showInformationMessage('No unused assets to delete.');
+                return;
+            }
 
-    // Watcher for file creation events
-    watcher.onDidCreate(async (uri) => {
-        if (isImageFile(uri.fsPath)) {
-            vscode.window.showInformationMessage(`Image file created: ${uri.fsPath}`);
-            await vscode.commands.executeCommand('files.check');
-        }
-    });
+            const confirmDelete = await vscode.window.showWarningMessage(
+                `Are you sure you want to delete all ${unusedFiles.length} unused assets? This action cannot be undone.`,
+                { modal: true },
+                'Delete All'
+            );
 
-    /**
-     * Handles file deletion events. Triggers the 'files.check' command when an image file is deleted.
-     * @param uri - The URI of the deleted file.
-     */
-    watcher.onDidDelete(async (uri) => {
-        if (isImageFile(uri.fsPath)) {
-            vscode.window.showInformationMessage(`Image file deleted: ${uri.fsPath}`);
-            await vscode.commands.executeCommand('files.check');
-        }
-    });
+            if (confirmDelete === 'Delete All') {
+                try {
+                    const deletionPromises = unusedFiles.map(filePath => {
+                        // Only attempt to delete if it's a real file path
+                        if (filePath !== '__loading__' && filePath !== '__no_assets__') {
+                            const fileUri = vscode.Uri.file(filePath);
+                            return vscode.workspace.fs.delete(fileUri);
+                        }
+                        return Promise.resolve(); // Skip special markers
+                    });
 
-    /**
-     * Checks if a given file path is an image file.
-     * @param filePath - The file path to check.
-     * @returns True if the file is an image, otherwise false.
-     */
-    function isImageFile(filePath: string): boolean {
-        return imageExtensions.some((ext) => filePath.endsWith(ext));
-    }
+                    await Promise.all(deletionPromises);
+                    provider.setLoading();
+                    await initializeCheck();
 
-    // Add the watcher to the subscriptions for proper cleanup when the extension is deactivated.
-    context.subscriptions.push(watcher);
+                } catch (error) {
+                    vscode.window.showErrorMessage(
+                        `Failed to delete all unused assets: ${error}`
+                    );
+                }
+            }
+        })
+    );
 
     // Register a command to delete an unused asset.
     context.subscriptions.push(
         vscode.commands.registerCommand('unusedAssets.deleteFile', async (filePath: string) => {
+            // Skip deletion for special markers
+            if (filePath === '__loading__' || filePath === '__no_assets__') {
+                return;
+            }
+
             const fileUri = vscode.Uri.file(filePath);
 
             // Confirm the deletion with the user.
             const confirmDelete = await vscode.window.showInformationMessage(
-                `Are you sure you want to delete "${filePath}"?`,
+                `Are you sure you want to delete "${path.basename(filePath)}"?`,
                 { modal: true },
                 'Delete'
             );
 
             if (confirmDelete === 'Delete') {
                 try {
-                    await vscode.workspace.fs.delete(fileUri); 
-                    vscode.window.showInformationMessage(`Successfully deleted "${filePath}".`);
+                    await vscode.workspace.fs.delete(fileUri);
                     // Refresh the assets list after deletion
                     provider.setLoading();
                     await initializeCheck();
+
                 } catch (error) {
-                    vscode.window.showErrorMessage(`Failed to delete "${filePath}".`);
+                    vscode.window.showErrorMessage(`Failed to delete "${path.basename(filePath)}".`);
                 }
             }
         })
@@ -117,19 +128,23 @@ export function activate(context: vscode.ExtensionContext) {
     // Register the preview file command, to preview an image or open a text document.
     context.subscriptions.push(
         vscode.commands.registerCommand('unusedAssets.previewFile', async (filePath: string) => {
+            if (filePath === '__loading__' || filePath === '__no_assets__') {
+                return;
+            }
+
             const fileUri = vscode.Uri.file(filePath);
 
             const fileExtension = path.extname(filePath).toLowerCase();
             if (['.jpg', '.jpeg', '.png', '.gif', '.svg'].includes(fileExtension)) {
                 try {
-                    await vscode.commands.executeCommand('vscode.open', fileUri); // Open image preview
+                    await vscode.commands.executeCommand('vscode.open', fileUri);
                 } catch (error) {
                     vscode.window.showErrorMessage(`Failed to preview image: ${error}`);
                 }
             } else {
                 try {
                     const doc = await vscode.workspace.openTextDocument(fileUri);
-                    await vscode.window.showTextDocument(doc); // Open text document preview
+                    await vscode.window.showTextDocument(doc); 
                 } catch (error) {
                     vscode.window.showErrorMessage(`Failed to open file: ${error}`);
                 }

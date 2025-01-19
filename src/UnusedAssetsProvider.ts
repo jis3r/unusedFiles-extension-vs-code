@@ -29,7 +29,7 @@ export class UnusedAssetsProvider implements vscode.TreeDataProvider<string> {
      */
     private loading: boolean = true;
 
-    
+
     /**
      * Refreshes the tree view with a new list of unused assets.
      * @param unusedAssets Array of file paths for unused assets.
@@ -73,45 +73,53 @@ export class UnusedAssetsProvider implements vscode.TreeDataProvider<string> {
         this._onDidChangeTreeData.fire();
     }
 
+    getUnusedAssets(): string[] {
+        return this.unusedAssets.filter(asset =>
+            asset !== '__loading__' && asset !== '__no_assets__'
+        );
+    }
+
     /**
      * Returns a tree item for a given element (unused asset).
      * @param element The file path of the unused asset.
      * @returns A TreeItem representing the unused asset.
      */
     getTreeItem(element: string): vscode.TreeItem {
-        // Handle loading state with spinning icon
-        if (this.loading) {
+        // Handle loading state
+        if (element === '__loading__') {
             const loadingItem = new vscode.TreeItem('Loading...', vscode.TreeItemCollapsibleState.None);
-            loadingItem.iconPath = new vscode.ThemeIcon('sync~spin'); // Spinning sync icon
+            loadingItem.iconPath = new vscode.ThemeIcon('sync~spin');
             loadingItem.tooltip = 'Searching for unused assets...';
             return loadingItem;
         }
 
-        // Extract the file name and extension
+        // Handle no assets state
+        if (element === '__no_assets__') {
+            const emptyItem = new vscode.TreeItem('No unused assets found', vscode.TreeItemCollapsibleState.None);
+            emptyItem.iconPath = new vscode.ThemeIcon('info');
+            emptyItem.tooltip = 'No unused assets were found in the workspace';
+            return emptyItem;
+        }
+
+        // Regular file handling
         const fileName = path.basename(element);
         const treeItem = new vscode.TreeItem(fileName, vscode.TreeItemCollapsibleState.None);
 
-        // Determine icon based on file type
         const fileExtension = path.extname(fileName).toLowerCase();
         if (['.jpg', '.jpeg', '.png', '.gif', '.svg'].includes(fileExtension)) {
-            treeItem.iconPath = new vscode.ThemeIcon('file-media'); // Media file icon
+            treeItem.iconPath = new vscode.ThemeIcon('file-media');
         } else if (['.txt', '.md'].includes(fileExtension)) {
-            treeItem.iconPath = new vscode.ThemeIcon('note'); // Note file icon
+            treeItem.iconPath = new vscode.ThemeIcon('note');
         } else {
-            treeItem.iconPath = new vscode.ThemeIcon('file'); // Generic file icon
+            treeItem.iconPath = new vscode.ThemeIcon('file');
         }
 
-        // Assign a context value for inline actions
         treeItem.contextValue = 'unusedAsset';
-
-        // Attach the preview command for default click behavior
         treeItem.command = {
             command: 'unusedAssets.previewFile',
             title: 'Preview File',
-            arguments: [element], // Pass the full file path to the command
+            arguments: [element],
         };
-
-        // Tooltip for better UX
         treeItem.tooltip = `Path: ${element}`;
 
         return treeItem;
@@ -123,13 +131,11 @@ export class UnusedAssetsProvider implements vscode.TreeDataProvider<string> {
      */
     getChildren(): string[] {
         if (this.loading) {
-            return ['Loading...']; 
+            return ['__loading__'];
         }
-
         if (this.unusedAssets.length === 0) {
-            return ['No unused assets found'];
+            return ['__no_assets__'];
         }
-
         return this.unusedAssets;
     }
 

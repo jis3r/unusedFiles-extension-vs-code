@@ -25,7 +25,6 @@ export async function getAllFilesInWorkspace(): Promise<vscode.Uri[]> {
  * @returns {Promise<boolean>} A promise that resolves to `true` if the image is used in any code file, otherwise `false`.
  */
 export async function isImageFileUsed(imageFile: string): Promise<boolean> {
-    // First, check if the result is cached
     if (imageUsageCache.has(imageFile)) {
         return imageUsageCache.get(imageFile)!;
     }
@@ -33,37 +32,59 @@ export async function isImageFileUsed(imageFile: string): Promise<boolean> {
     const imageFileName = path.basename(imageFile).toLowerCase();
     const excludePattern = EXCLUDED_DIRECTORIES.map(dir => `**/${dir}/**`).join(',');
 
-    const fileTypes = ['.js', '.ts', '.html', '.css', '.tsx', '.jsx'];
+    // Add Python, Django, and other frameworks' extensions to fileTypes
+    const fileTypes = [
+        '.js',    // JavaScript files
+        '.ts',    // TypeScript files
+        '.html',  // HTML files
+        '.css',   // CSS files
+        '.tsx',   // TypeScript with JSX 
+        '.jsx',   // JavaScript with JSX 
+        '.json',  // JSON files 
+        '.ejs',   // EJS files 
+        '.svelte',// Svelte component files
+        '.vue',   // Vue.js component files
+        '.scss',  // SCSS files 
+        '.sass',  // SASS files 
+        '.less',  // LESS files 
+        '.py',    // Python files
+        '.j2',    // Jinja2 files
+        '.go',    // Go source files
+        '.java',  // Java source files
+        '.jsp',   // Java Server Pages
+        '.gohtml',// Go HTML templates
+    ];
+
     const files = await vscode.workspace.findFiles(
         '**/*',
         `**/{${excludePattern}}`, 5000
     );
 
-    // Use Promise.all for parallel file checking
     const filePromises = files.map(async (fileUri) => {
         const filePath = fileUri.fsPath;
         const fileExtension = path.extname(filePath).toLowerCase();
 
         if (fileTypes.includes(fileExtension)) {
-            const fileContent = await vscode.workspace.fs.readFile(fileUri);
-            const contentString = fileContent.toString().toLowerCase();
-            const regex = new RegExp(imageFileName, 'i');
+            try {
+                const fileContent = await vscode.workspace.fs.readFile(fileUri);
+                const contentString = fileContent.toString().toLowerCase();
+                const regex = new RegExp(`['"(]?${imageFileName}['")]?`, 'i');
 
-            if (regex.test(contentString)) {
-                return true;
+                if (regex.test(contentString)) {
+                    return true;
+                }
+            } catch (error) {
+                console.error(`Failed to read file: ${filePath}`, error);
             }
         }
 
-        return false; // return false for this file if no match
+        return false;
     });
 
-    // Wait for all promises to resolve, and check for any `true` results
     const results = await Promise.all(filePromises);
-    const isUsed = results.some(result => result); // If any file returned true, set to true
+    const isUsed = results.some(result => result);
 
-    // Cache the result
     imageUsageCache.set(imageFile, isUsed);
-
     return isUsed;
 }
 

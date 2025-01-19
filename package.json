@@ -2,7 +2,7 @@
   "name": "unused-assets-finder",
   "displayName": "Unused Assets Finder",
   "description": "Find and manage unused Asset files in your project.",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "publisher": "shuheb",
   "license": "MIT",
   "icon": "icon.png",
@@ -47,10 +47,10 @@
         "icon": "$(refresh)"
       },
       {
-        "command": "unusedAssets.previewFile",
-        "title": "Preview",
+        "command": "unusedAssets.deleteAllFiles",
+        "title": "Delete",
         "category": "Unused Files Tools",
-        "icon": "$(eye)"
+        "icon": "$(trash)"
       },
       {
         "command": "unusedAssets.deleteFile",
@@ -65,14 +65,14 @@
           "command": "files.check",
           "group": "navigation",
           "icon": "$(refresh)"
+        },
+        {
+          "command": "unusedAssets.deleteAllFiles",
+          "group": "navigation",
+          "icon": "$(trash-all)"
         }
       ],
       "view/item/context": [
-        {
-          "command": "unusedAssets.previewFile",
-          "group": "inline",
-          "icon": "$(eye)"
-        },
         {
           "command": "unusedAssets.deleteFile",
           "group": "inline",
