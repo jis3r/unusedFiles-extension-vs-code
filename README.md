@@ -34,7 +34,7 @@ This VSCode extension helps developers identify and manage unused image files in
 
 ## Supported File Types
 
-- **Image file types**: `.jpg`, `.jpeg`, `.png`, `.svg`, `.gif`, `.bmp`, `.webp`
+- **Image file types**: `.jpg`, `.jpeg`, `.png`, `.svg`, `.gif`, `.bmp`, `.webp`, `.avif`
 - **Code file types**: `.js`, `.ts`, `.html`, `.css`, `.tsx`, `.jsx`
 
 ## Customization
